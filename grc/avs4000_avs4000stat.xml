@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<block>
+  <name>Avs4000STAT</name>
+  <key>avs4000_avs4000stat</key>
+  <category>[AVS4000]</category>
+  <import>import avs4000</import>
+  <make>avs4000.avs4000stat($dn)</make>
+  <param>
+          <name>Device Number</name>
+          <key>dn</key>
+          <value>1</value>
+          <type>int</type>
+  </param>
+</block>

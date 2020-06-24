@@ -1,0 +1,30 @@
+INCLUDE(FindPkgConfig)
+PKG_CHECK_MODULES(PC_AVS4000 avs4000)
+
+FIND_PATH(
+    AVS4000_INCLUDE_DIRS
+    NAMES avs4000/api.h
+    HINTS $ENV{AVS4000_DIR}/include
+        ${PC_AVS4000_INCLUDEDIR}
+    PATHS ${CMAKE_INSTALL_PREFIX}/include
+          /usr/local/include
+          /usr/include
+)
+
+FIND_LIBRARY(
+    AVS4000_LIBRARIES
+    NAMES gnuradio-avs4000
+    HINTS $ENV{AVS4000_DIR}/lib
+        ${PC_AVS4000_LIBDIR}
+    PATHS ${CMAKE_INSTALL_PREFIX}/lib
+          ${CMAKE_INSTALL_PREFIX}/lib64
+          /usr/local/lib
+          /usr/local/lib64
+          /usr/lib
+          /usr/lib64
+)
+
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(AVS4000 DEFAULT_MSG AVS4000_LIBRARIES AVS4000_INCLUDE_DIRS)
+MARK_AS_ADVANCED(AVS4000_LIBRARIES AVS4000_INCLUDE_DIRS)
+

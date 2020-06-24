@@ -1,0 +1,7 @@
+/*!
+ * \defgroup block GNU Radio AVS4000 C++ Signal Processing Blocks
+ * \brief All C++ blocks that can be used from the AVS4000 GNU Radio
+ *        module are listed here or in the subcategories below.
+ *
+ */
+

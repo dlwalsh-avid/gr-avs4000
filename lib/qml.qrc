@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>avs4000api.js</file>
+        <file>ParamBox.qml</file>
+    </qresource>
+</RCC>

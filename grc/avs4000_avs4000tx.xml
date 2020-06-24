@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<block>
+    <name>Avs4000TX</name>
+    <key>avs4000_avs4000tx</key>
+    <category>[AVS4000]</category>
+  <import>import avs4000</import>
+  <make>avs4000.avs4000tx($dn, $rate, $txFreq, $txRFBW,
+                          $ducFreq, $ducOutGain,
+                          $ampEnable, $txOutRxEn,
+                          $startMode, $refMaster,
+                          $tbSrc,$refMode,
+                          $ppsSel,$sysSync)</make>
+  <callback>SetTxFreq($txFreq)</callback>
+  <callback>SetDUCFreq($ducFreq)</callback>
+  <callback>SetDUCOutGain($ducOutGain)</callback>
+  <param>
+          <name>Device Number</name>
+          <key>dn</key>
+          <value>1</value>
+          <type>int</type>
+  </param>
+  <param>
+          <name>Sample Rate</name>
+          <key>rate</key>
+          <value>samp_rate</value>
+          <type>real</type>
+  </param>
+  <param>
+          <name>TX Frequency</name>
+          <key>txFreq</key>
+          <value>2.4e9</value>
+          <type>real</type>
+  </param>
+  <param>
+          <name>DUC Frequency</name>
+          <key>ducFreq</key>
+          <value>duc_freq</value>
+          <type>real</type>
+  </param>
+  <param>
+          <name>DUC Out Gain</name>
+          <key>ducOutGain</key>
+          <value>duc_ogain</value>
+          <type>real</type>
+  </param>
+  <param>
+          <name>RF Bandwidth</name>
+          <key>txRFBW</key>
+          <value>0</value>
+          <type>real</type>
+  </param>
+  <param>
+          <name>TX Amp Enable</name>
+          <key>ampEnable</key>
+          <value>Disable</value>
+          <type>enum</type>
+          <option>
+            <name>Disable</name>
+            <key>False</key>
+          </option>
+          <option>
+            <name>Enable</name>
+            <key>True</key>
+          </option>
+  </param>
+  <param>
+          <name>Output Select</name>
+          <key>txOutRxEn</key>
+          <value>TX</value>
+          <type>enum</type>
+          <option>
+            <name>TX</name>
+            <key>False</key>
+          </option>
+          <option>
+            <name>RX/TX</name>
+            <key>True</key>
+          </option>
+  </param>
+  <param>
+          <name>Start Mode</name>
+          <key>startMode</key>
+          <value>Immediate</value>
+          <type>enum</type>
+          <option>
+            <name>Immediate</name>
+            <key>"Immediate"</key>
+          </option>
+          <option>
+            <name>On PPS</name>
+            <key>"OnPPS"</key>
+          </option>
+  </param>
+  <param>
+          <name>Ref Master</name>
+          <key>refMaster</key>
+          <value>Disable</value>
+          <type>enum</type>
+          <option>
+            <name>Disable</name>
+            <key>False</key>
+          </option>
+          <option>
+            <name>Enable</name>
+            <key>True</key>
+          </option>
+  </param>
+  <param>
+          <name>Ref Mode</name>
+          <key>refMode</key>
+          <value>Internal</value>
+          <type>enum</type>
+          <hide>
+          #if $refMaster()=='True'
+            part
+          #else
+            all
+          #end if
+          </hide>
+          <option>
+            <name>Internal</name>
+            <key>"Internal"</key>
+          </option>
+          <option>
+            <name>Internal Static</name>
+            <key>"InternalStatic"</key>
+          </option>
+          <option>
+            <name>External</name>
+            <key>"External"</key>
+          </option>
+          <option>
+            <name>GPSDO</name>
+            <key>"GPSDO"</key>
+          </option>
+          <option>
+            <name>PPS</name>
+            <key>"PPS"</key>
+          </option>
+  </param>
+  <param>
+          <name>PPS Select</name>
+          <key>ppsSel</key>
+          <value>Internal</value>
+          <type>enum</type>
+          <hide>
+          #if $refMaster()=='True'
+            part
+          #else
+            all
+          #end if
+          </hide>
+          <option>
+            <name>Internal</name>
+            <key>"internal"</key>
+          </option>
+          <option>
+            <name>External</name>
+            <key>"External"</key>
+          </option>
+          <option>
+            <name>GPS</name>
+            <key>"GPS"</key>
+          </option>
+  </param>
+  <param>
+          <name>Timebase Src</name>
+          <key>tbSrc</key>
+          <value>"host"</value>
+          <type>enum</type>
+          <hide>
+          #if $refMaster()=='True'
+            part
+          #else
+            all
+          #end if
+          </hide>
+          <option>
+            <name>Host</name>
+            <key>"host"</key>
+          </option>
+          <option>
+            <name>GPS</name>
+            <key>"gps"</key>
+          </option>
+  </param>
+  <param>
+          <name>System Sync</name>
+          <key>sysSync</key>
+          <value>Disable</value>
+          <type>enum</type>
+          <hide>
+          #if $refMaster()=='True'
+            part
+          #else
+            all
+          #end if
+          </hide>
+          <option>
+            <name>Disable</name>
+            <key>False</key>
+          </option>
+          <option>
+            <name>Enable</name>
+            <key>True</key>
+          </option>
+  </param>
+  <sink>
+      <name>in</name>
+      <type>complex</type>
+  </sink>
+</block>
