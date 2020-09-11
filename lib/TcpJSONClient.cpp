@@ -54,18 +54,44 @@ void TcpJSONClient::Init(Script *script)
 //    if (cfg->Get(nsTJSON).toBool()) {
         Debug::AddDebug("tjclient",TcpJSONClient::GetVerbose,
                                    TcpJSONClient::SetVerbose,this);
-        script->GlobalObj()->Add("tjclient",this);
-        CmdMap *cm=new CmdMap("avsapi");
-        cm->Add("get","tjclient.GetCmd(%S)","Get parameters");
-        cm->Add("set","tjclient.SetCmd('%0',%1)","Set parameters");
-        cm->Add("getp","tjclient.GetPCmd(%S)","Get pending parameters");
-        cm->Add("setn","tjclient.SetNCmd('%0',%1)","Set parameter without commit");
-        cm->Add("commit","tjclient.CommitCmd(%S)","Commit changed parameters");
-        cm->Add("discard","tjclient.DiscardCmd(%S)","Discard pending parameters");
-        cm->Add("geterr","tjclient.GetErrCmd()","Get List of API Errors");
-        cm->Add("getcmd","tjclient.GetCmdCmd()","Get List of API Commands");
-        cm->Add("info","tjclient.InfoCmd(%S)","Get info about parameters");
-        script->Add(cm);
+//        script->GlobalObj()->Add("tjclient",this);
+        script->GlobalObj()->Add("api",this);
+        CmdMap *cm=new CmdMap("api");
+        cm->Add("get","api.GetCmd(%S)","Get API parameters",
+                "Usage:\n"
+                "      api get                // Display all parameters\n"
+                "      api get [group]        // Display parameters for a group\n"
+                "      api get [group.param]  // Display a single parameter\n"
+                "Exmaples:\n"
+                "      api get rx             // Display RX parameter group\n"
+                "      api get rx.freq        // Display RX.FREQ parameter\n");
+        cm->Add("set","api.SetCmd('%0',%1)","Set API parameters",
+                "Usage:\n"
+                "      api set <group.param> <val>\n"
+                "Exmaples:\n"
+                "      api set rx.freq 2.1e9\n"
+                "      api set rx.lbmode 'auto'\n");
+        cm->Add("getp","api.GetPCmd(%S)","Get pending API parameters",
+                "Usage:\n"
+                "      api getp               // Display pending parameters\n"
+                "      api getp [group]       // Display pending params for a group\n"
+                "Exmaple:\n"
+                "      api getp rx            // Display RX pending parameters\n");
+        cm->Add("setn","api.SetNCmd('%0',%1)","Set API params without commit",
+                "Usage:\n"
+                "      api setn <group.param> <val>\n");
+        cm->Add("commit","api.CommitCmd()","Commit API parameters",
+                "Usage:\n"
+                "      api commit\n");
+        cm->Add("discard","api.DiscardCmd()","Discard pending API parameters",
+                "Usage:\n"
+                "      api discard\n");
+        cm->Add("info","api.InfoCmd(%S)","Display Info about API parameters",
+                "Usage:\n"
+                "      api info [group]\n");
+        cm->Add("geterr","api.GetErrCmd()","Get List of API Errors");
+        cm->Add("getcmd","api.GetCmdCmd()","Get List of API Commands");
+        script->GlobalCmd()->AddNested("api",cm,"API Parameter related commands");
 //    }
 }
 #endif

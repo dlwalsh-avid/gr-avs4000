@@ -129,7 +129,7 @@ namespace gr {
         quint32 rval=client->rxSig->ReceiveSamples(reinterpret_cast<quint32*>(rBuf),
                                                    samples,&t);
         if (rval!=samples) {
-//            qWarning("Only recv %d out %d samples",rval,samples);
+            qWarning("Only recv %d out %d samples",rval,samples);
             return -1;
         }
         if (t.valid) {
@@ -207,7 +207,7 @@ namespace gr {
 
     bool avs4000rx_impl::start()
     {
-        qDebug("RX start...");
+        qDebug("RX start: dn=%d",dn);
         this->client=AVS4000Client::Get("localhost",dn);
         Q_ASSERT(this->client);
         client->StopRx();
@@ -244,7 +244,7 @@ namespace gr {
 
     bool avs4000rx_impl::stop()
     {
-//        qDebug("stop...");
+        qDebug("RX Stop: dn=%d",dn);
         if (client) {
             quint32 ecode;
             QString details;

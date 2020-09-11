@@ -204,7 +204,7 @@ namespace gr {
 
     bool avs4000tx_impl::start()
     {
-        qDebug("TX start...");
+        qDebug("TX start: dn=%d",dn);
         this->client=AVS4000Client::Get("localhost",dn);
         Q_ASSERT(this->client);
         client->StopTx();
@@ -249,7 +249,7 @@ namespace gr {
 
     bool avs4000tx_impl::stop()
     {
-//        qDebug("stop...");
+        qDebug("TX Stop: dn=%d",dn);
         if (client) {
             quint32 ecode;
             QString details;

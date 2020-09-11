@@ -17,20 +17,15 @@ Window {
     title: qsTr("AVS4000")
     color: "black"
 
-//    Text {
-//           anchors.centerIn: parent
-//           text: API.text()
-//    }
-//    FontLoader { id: lcdFont; source: "/font/DigitaldreamNarrow.ttf" }
-//    FontLoader { id: fixedFont; name: "Courier" }
-
     GridLayout{
+        anchors.topMargin: 2
+        anchors.bottomMargin: 2
+        anchors.fill: parent
         columns: (width<height)?1:3
         rows: (width<height)?27:9
         columnSpacing: 2
         rowSpacing: 1
         flow: GridLayout.TopToBottom
-        anchors.fill: parent
         ParamBox { id: dn; name: "Device Number:" }
         ParamBox { id: sn; name: "Serial Number:" }
         ParamBox { id: tempBoard; name: "Board Temp:" }

@@ -25,6 +25,7 @@ static const char *pConEnable="ConEnable";
 static const char *pConType="ConType";
 static const char *pConPort="ConPort";
 static const char *pUseV49="UseV49";
+static const char *pUseBigEndian="UseBE";
 static const char *pTestPattern="TestPattern";
 static const char *pSampleRate="SampleRate";
 static const char *pTimeBase="TimeBase";
@@ -143,6 +144,7 @@ bool AVS4000Client::ConnectRxTcp(const QString &hostname,quint16 port,
         grp.insert(pConType,"tcp");
         grp.insert(pConPort,port);
         grp.insert(pUseV49,useVita49);
+        grp.insert(pUseBigEndian,false);
         map.insert(gRXDATA,grp);
         bool rval=Set(map,errorCode,errorDetails);
         if (rval) {
@@ -235,6 +237,7 @@ bool AVS4000Client::ConnectTxTcp(const QString &hostname, quint16 port, bool use
         grp.insert(pConType,"tcp");
         grp.insert(pConPort,port);
         grp.insert(pUseV49,useVita49);
+        grp.insert(pUseBigEndian,false);
         grp.insert(pRun,false);
         map.insert(gTXDATA,grp);
         bool rval=Set(map,errorCode,errorDetails);

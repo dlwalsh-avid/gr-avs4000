@@ -9,7 +9,7 @@ GNU Radio 3.7.11.
 To build the gr_avs4000 module the following needs to be installed:
 
 ```
-$ sudo apt-get install gnuradio-dev swig cmake build-essential doxygen xterm pkg-config
+$ sudo apt-get install gnuradio-dev swig cmake build-essential doxygen xterm pkg-config qml-module-qtquick2 qml-module-qtquick-templates2 qml-module-qtquick-layouts qml-module-qtquick-window2 qml-module-qtquick-controls2 qml-module-qtquick-controls qml-module-qtgraphicaleffects
 ```
 
 Building GR-AVS4000
