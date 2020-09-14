@@ -264,13 +264,14 @@ bool TcpJSONClient::Call(const QString &cmd, const QVariant &arg, QVariant &rval
     if (arg.isValid() && !arg.isNull())
         req.append(arg);
     if (!mutex.tryLock(0)) {
-        errorCode=APIError::apiBusy;
-        errorDetails.sprintf("Busy");
+        // Dont send the request but instead queue it as a Busy REQ
+        // This will start a timer.  When the timer expires the request will be
+        // sent.
         emit Busy(req);
-        return false;
+        return true;
     }
     busyMutex.lock();
-    busyReq.clear();
+    busyReq.clear();    // clears any pending busy request
     busyMutex.unlock();
     SendREQ(req);
     rval.clear();
