@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2020 <+YOU OR YOUR COMPANY+>.
+ * Copyright 2020 Avid Systems, Inc.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,8 @@ namespace gr {
   namespace avs4000 {
 
     avs4000tx::sptr
-    avs4000tx::make(int dn,double rate,double txFreq,double txRFBW,
+    avs4000tx::make(const std::string &host,int dn,
+                    double rate,double txFreq,double txRFBW,
                     double ducFreq,double ducOutGain,
                     bool ampEnable,bool outRxEn,
                     const char *startMode,bool refMaster,
@@ -72,7 +73,8 @@ namespace gr {
                     const char *ppsSource,bool sysSync)
     {
       return gnuradio::get_initial_sptr
-        (new avs4000tx_impl(dn,rate,txFreq,txRFBW,
+        (new avs4000tx_impl(host,dn,
+                            rate,txFreq,txRFBW,
                             ducFreq,ducOutGain,
                             ampEnable,outRxEn,
                             startMode,refMaster,
@@ -82,7 +84,8 @@ namespace gr {
     /*
      * The private constructor
      */
-    avs4000tx_impl::avs4000tx_impl(int dn,double rate, double txFreq, double txRFBW,
+    avs4000tx_impl::avs4000tx_impl(const std::string &host,int dn,
+                                   double rate, double txFreq, double txRFBW,
                                    double ducFreq,double ducOutGain,
                                    bool ampEnable, bool outRxEn,
                                    const char *startMode, bool refMaster,
@@ -94,6 +97,7 @@ namespace gr {
     {
         client=nullptr;
         tBuf=new qint16[BUFFER_SAMPLES*2];
+        this->host=QString(host.c_str());
 	this->dn=dn;
         this->rate=rate;
         this->txFreq=txFreq;
@@ -139,8 +143,12 @@ namespace gr {
         // this function needs to not block!!  or only block for short time
         quint32 rval=client->txSig->Send((const quint8*)tBuf,bytes);
         if (rval<bytes) {
-            qWarning("Only sent %d out %ld bytes",rval,bytes);
-            if (rval==0 && txRetry++>=20) return -1;
+//            qWarning("Only sent %d out %ld bytes",rval,bytes);
+            if (rval==0 && txRetry++>=20) {
+                qWarning("Only sent %d out %ld bytes after %d retries",
+                         rval,bytes,txRetry);
+                return -1;
+            }
         } else
             txRetry=0;
       // Tell runtime system how many output items we produced.
@@ -205,7 +213,7 @@ namespace gr {
     bool avs4000tx_impl::start()
     {
         qDebug("TX start: dn=%d",dn);
-        this->client=AVS4000Client::Get("localhost",dn);
+        this->client=AVS4000Client::Get(host,dn);
         Q_ASSERT(this->client);
         client->StopTx();
         if (refMaster) {
@@ -234,7 +242,7 @@ namespace gr {
         QString details;
         bool rval=client->Set(map,ecode,details);
         if (rval) {
-            rval=client->ConnectTxTcp("localhost",AVSTX_BASEPORT+dn,true,ecode,details) &&
+            rval=client->ConnectTxTcp(host,AVSTX_BASEPORT+dn,true,ecode,details) &&
                  client->StartTxData(ecode,details);
         } else
             qDebug("Tx Set failed.");

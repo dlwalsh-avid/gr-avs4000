@@ -28,6 +28,7 @@ TcpTxSignalClient::TcpTxSignalClient(quint8 dn,bool useVita49,
     this->plen=0;
     sock=socket(AF_INET,SOCK_STREAM,0);
     if (sock>=0) {
+#if 0
         const char *A="127.0.0.1";
         struct sockaddr_in addr;
         memset(&addr,0,sizeof(addr));
@@ -37,11 +38,43 @@ TcpTxSignalClient::TcpTxSignalClient(quint8 dn,bool useVita49,
         if (::connect(sock,reinterpret_cast<struct sockaddr *>(&addr),sizeof(addr)))
             qWarning("Failed to connect to %s:%d - %s",A,port,strerror(errno));
         else {
-            qDebug("Attach port=%d to fd=%d",port,sock);
+//            qDebug("Attach port=%d to fd=%d",port,sock);
             buffer.Attach(sock);
             if (verbose)
                 qDebug("Connected to %s:%d",A,port);
         }
+#else
+        struct addrinfo *res;
+        struct sockaddr_in addr;
+        const char *LOCALHOST="127.0.0.1";
+        memset(&addr,0,sizeof(addr));
+        addr.sin_port=htons(port);
+        addr.sin_addr.s_addr=inet_addr(LOCALHOST);
+        addr.sin_family=AF_INET;
+        int ecode=getaddrinfo(hostname.toLatin1().constData(),nullptr,nullptr,&res);
+        if (ecode) {
+            qWarning("Failed to lookup hostname, '%s'.  rval=%d",qPrintable(hostname),ecode);
+        } else {
+            struct addrinfo *ai;
+            for (ai=res;ai;ai=ai->ai_next) {
+                if (ai->ai_family==PF_INET) {
+                    struct sockaddr_in *sa=reinterpret_cast<struct sockaddr_in *>(ai->ai_addr);
+                    addr.sin_family=AF_INET;
+                    addr.sin_addr.s_addr=sa->sin_addr.s_addr;
+                    break;
+                }
+            }
+        }
+        if (::connect(sock,reinterpret_cast<struct sockaddr *>(&addr),sizeof(addr)))
+            qWarning("Failed to connect to %s(%s):%d - %s",
+                     qPrintable(hostname),inet_ntoa(addr.sin_addr),port,strerror(errno));
+        else {
+            buffer.Attach(sock);
+            if (verbose)
+                qDebug("Connected to %s(%s):%d",
+                       qPrintable(hostname),inet_ntoa(addr.sin_addr),port);
+        }
+#endif
     } else
         qWarning("Failed to create socket");
     nextFrameCount=0;
@@ -78,7 +111,7 @@ quint32 TcpTxSignalClient::Send(const quint8 *data,quint32 len)
         while (sent<len) {
             quint32 amt=len-sent;
             if (plen==0) {
-                if (buffer.WaitForReadySend(100)) {
+                if (buffer.WaitForReadySend(500)) {
                     quint32 max;
                     quint8 *buf=buffer.SendStart(max);
                     if (max<pktSize) {

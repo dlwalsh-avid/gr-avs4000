@@ -4,13 +4,21 @@
     <key>avs4000_avs4000rx</key>
     <category>[AVS4000]</category>
   <import>import avs4000</import>
-  <make>avs4000.avs4000rx($dn, $rate, $rxFreq, $rxRFBW, 
+  <make>avs4000.avs4000rx($host, $dn,
+                          $rate, $rxFreq, $rxRFBW,
+                          $rfGain, $gainMode,
                           $ddcFreq, $ddcOutGain,
                           $startMode, $refMaster,
                           $tbSrc,$refMode,$ppsSel,$sysSync)</make>
   <callback>SetRxFreq($rxFreq)</callback>
   <callback>SetDDCFreq($ddcFreq)</callback>
   <callback>SetDDCOutGain($ddcOutGain)</callback>
+  <param>
+          <name>Host</name>
+          <key>host</key>
+          <value>"localhost"</value>
+          <type>string</type>
+  </param>
   <param>
           <name>Device Number</name>
           <key>dn</key>
@@ -30,6 +38,40 @@
           <type>real</type>
   </param>
   <param>
+          <name>RX RF Bandwidth</name>
+          <key>rxRFBW</key>
+          <value>0</value>
+          <type>real</type>
+  </param>
+  <param>
+          <name>RF Gain</name>
+          <key>rfGain</key>
+          <value>50</value>
+          <type>real</type>
+  </param>
+  <param>
+          <name>Gain Mode</name>
+          <key>gainMode</key>
+          <value>SlowAGC</value>
+          <type>enum</type>
+          <option>
+            <name>Slow Attack AGC</name>
+            <key>"SlowAGC"</key>
+          </option>
+          <option>
+            <name>Fast Attack AGC</name>
+            <key>"FastAGC"</key>
+          </option>
+          <option>
+            <name>Hybrid AGC</name>
+            <key>"HybridAGC"</key>
+          </option>
+          <option>
+            <name>Manual</name>
+            <key>"Manual"</key>
+          </option>
+  </param>
+  <param>
           <name>DDC Frequency</name>
           <key>ddcFreq</key>
           <value>ddc_freq</value>
@@ -39,12 +81,6 @@
           <name>DDC Out Gain</name>
           <key>ddcOutGain</key>
           <value>ddc_ogain</value>
-          <type>real</type>
-  </param>
-  <param>
-          <name>RX RF Bandwidth</name>
-          <key>rxRFBW</key>
-          <value>0</value>
           <type>real</type>
   </param>
   <param>

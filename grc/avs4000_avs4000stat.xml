@@ -4,7 +4,13 @@
   <key>avs4000_avs4000stat</key>
   <category>[AVS4000]</category>
   <import>import avs4000</import>
-  <make>avs4000.avs4000stat($dn)</make>
+  <make>avs4000.avs4000stat($host,$dn)</make>
+  <param>
+          <name>Host</name>
+          <key>host</key>
+          <value>"localhost"</value>
+          <type>string</type>
+  </param>
   <param>
           <name>Device Number</name>
           <key>dn</key>

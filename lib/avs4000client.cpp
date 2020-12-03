@@ -19,6 +19,7 @@
 
 #include <QMutexLocker>
 #include <QElapsedTimer>
+#include <QCoreApplication>
 
 static const char *pRun="Run";
 static const char *pConEnable="ConEnable";
@@ -62,6 +63,13 @@ AVS4000Client::AVS4000Client(const QString &hostname, quint8 dn)
     this->hostname=hostname;
     this->rxSig=nullptr;
     this->txSig=nullptr;
+    if (QCoreApplication::instance()==nullptr) {
+        int argc=1;
+        char exe[8];
+        strncpy(exe,"avs4000client",sizeof(exe));
+        char *argv[]={ exe,nullptr};
+        QCoreApplication *app=new QCoreApplication(argc,argv);
+    }
     client=new TcpJSONClient(hostname,AVSAPI_BASEPORT+dn);
     Q_ASSERT(client);
     client->WaitForConnected();

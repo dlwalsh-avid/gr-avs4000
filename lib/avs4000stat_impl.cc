@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2020 <+YOU OR YOUR COMPANY+>.
+ * Copyright 2020 Avid Systems, Inc.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,22 +38,22 @@ namespace gr {
   namespace avs4000 {
 
     avs4000stat::sptr
-    avs4000stat::make(int dn)
+    avs4000stat::make(const std::string &host,int dn)
     {
       return gnuradio::get_initial_sptr
-        (new avs4000stat_impl(dn));
+        (new avs4000stat_impl(host,dn));
     }
 
     /*
      * The private constructor
      */
-    avs4000stat_impl::avs4000stat_impl(int dn)
+    avs4000stat_impl::avs4000stat_impl(const std::string &host, int dn)
       : gr::block("avs4000stat",
               gr::io_signature::make(0,0,0),
               gr::io_signature::make(0,0,0))
     {
         qDebug("Avs4000Stat...");
-        this->con=new AVSAPICon(DEFAULT_HOST,dn);
+        this->con=new AVSAPICon(QString(host.c_str()),dn);
         this->engine=new QQmlApplicationEngine();
         Q_ASSERT(engine);
         engine->rootContext()->setContextProperty("sock",con);

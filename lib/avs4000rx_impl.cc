@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2020 <+YOU OR YOUR COMPANY+>.
+ * Copyright 2020 Avid Systems, Inc.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,8 @@ static const char *pTestPattern="TestPattern";
 static const char *pLoopback="loopback";
 static const char *pSampleRate="SampleRate";
 static const char *pFreq="Freq";
+static const char *pGain="Gain";
+static const char *pGainMode="GainMode";
 static const char *pOutGain="OutGain";
 static const char *pTimeBase="TimeBase";
 static const char *pPPSSel="PPSSel";
@@ -61,14 +63,18 @@ namespace gr {
   namespace avs4000 {
 
     avs4000rx::sptr
-    avs4000rx::make(int dn,double rate,double rxFreq,double rxRFBW,
+    avs4000rx::make(const std::string &host, int dn,
+                    double rate,double rxFreq,double rxRFBW,
+                    int rfGain,const char *gainMode,
                     double ddcFreq,double ddcOutGain,
                     const char *startMode,bool refMaster,
                     const char *tbSource,const char *refMode,
                     const char *ppsSource,bool sysSync)
     {
       return gnuradio::get_initial_sptr
-        (new avs4000rx_impl(dn,rate,rxFreq,rxRFBW,
+        (new avs4000rx_impl(host,dn,
+                            rate,rxFreq,rxRFBW,
+                            rfGain,gainMode,
                             ddcFreq,ddcOutGain,
                             startMode,refMaster,
                             tbSource,refMode,ppsSource,sysSync));
@@ -77,7 +83,9 @@ namespace gr {
     /*
      * The private constructor
      */
-    avs4000rx_impl::avs4000rx_impl(int dn,double rate, double rxFreq, double rxRFBW,
+    avs4000rx_impl::avs4000rx_impl(const std::string &host,int dn,
+                                   double rate, double rxFreq, double rxRFBW,
+                                   int rfGain,const char *gainMode,
                                    double ddcFreq, double ddcOutGain,
                                    const char *startMode,
                                    bool refMaster,
@@ -92,12 +100,15 @@ namespace gr {
         rBuf=new qint16[BUFFER_SAMPLES*2];
         this->id=pmt::string_to_symbol("avs4000rx");
         client=nullptr;
+        this->host=QString(host.c_str());
 	this->dn=dn;
         this->startMode=startMode;
         this->refMaster=refMaster;
         this->rate=rate;
         this->rxFreq=rxFreq;
         this->rxRFBW=rxRFBW;
+        this->rfGain=rfGain;
+        this->gainMode=gainMode;
         this->ddcFreq=ddcFreq;
         this->ddcOutGain=ddcOutGain;
         this->tbSource=tbSource;
@@ -208,7 +219,7 @@ namespace gr {
     bool avs4000rx_impl::start()
     {
         qDebug("RX start: dn=%d",dn);
-        this->client=AVS4000Client::Get("localhost",dn);
+        this->client=AVS4000Client::Get(host,dn);
         Q_ASSERT(this->client);
         client->StopRx();
         if (refMaster) {
@@ -225,6 +236,8 @@ namespace gr {
         rx.insert(pFreq,rxFreq);
         rx.insert(pStartMode,startMode);
         rx.insert(pRFBW,rxRFBW);
+        rx.insert(pGain,rfGain);
+        rx.insert(pGainMode,gainMode);
         map.insert(gRX,rx);
         QVariantMap ddc;
         ddc.insert(pFreq,ddcFreq);
@@ -234,7 +247,7 @@ namespace gr {
         QString details;
         bool rval=client->Set(map,ecode,details);
         if (rval) {
-            rval=client->ConnectRxTcp("localhost",AVSRX_BASEPORT+dn,true,ecode,details) &&
+            rval=client->ConnectRxTcp(host,AVSRX_BASEPORT+dn,true,ecode,details) &&
                  client->StartRxData(false,ecode,details);
         }
         if (!rval)

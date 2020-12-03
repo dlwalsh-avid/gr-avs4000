@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2020 <+YOU OR YOUR COMPANY+>.
+ * Copyright 2020 Avid Systems, Inc.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,8 @@ namespace gr {
        * class. avs4000::avs4000tx::make is the public interface for
        * creating new instances.
        */
-      static sptr make(int dn,double rate,double txFreq,double txRFBW,
+      static sptr make(const std::string &host, int dn,
+                       double rate,double txFreq,double txRFBW,
 		       double ducFreq,double ducOutgain,
                        bool ampEnable,bool outRxEn,
                        const char *startMode,bool refMaster,

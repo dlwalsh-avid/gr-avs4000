@@ -104,7 +104,7 @@ protected:
     void SendREQ(const QVariant &req);
     bool WaitForResponse(int msTimeout);
     bool Call(const QString &cmd, const QVariant &arg, QVariant &rval,
-              quint32 &errorCode, QString &errorDetails, int msTimeout=10000);
+              quint32 &errorCode, QString &errorDetails, int msTimeout=15000);
     QVariant rsp;
     QString hostname;
     quint16 port;

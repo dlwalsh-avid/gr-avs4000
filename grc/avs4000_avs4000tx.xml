@@ -4,7 +4,8 @@
     <key>avs4000_avs4000tx</key>
     <category>[AVS4000]</category>
   <import>import avs4000</import>
-  <make>avs4000.avs4000tx($dn, $rate, $txFreq, $txRFBW,
+  <make>avs4000.avs4000tx($host, $dn,
+                          $rate, $txFreq, $txRFBW,
                           $ducFreq, $ducOutGain,
                           $ampEnable, $txOutRxEn,
                           $startMode, $refMaster,
@@ -13,6 +14,12 @@
   <callback>SetTxFreq($txFreq)</callback>
   <callback>SetDUCFreq($ducFreq)</callback>
   <callback>SetDUCOutGain($ducOutGain)</callback>
+  <param>
+          <name>Host</name>
+          <key>host</key>
+          <value>"localhost"</value>
+          <type>string</type>
+  </param>
   <param>
           <name>Device Number</name>
           <key>dn</key>

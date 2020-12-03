@@ -5,6 +5,7 @@
 //
 #include "TcpRxSignalClient.h"
 #include <netdb.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -25,18 +26,35 @@ TcpRxSignalClient::TcpRxSignalClient(bool useV49,const QString &hostname,quint16
     this->partial=0;
     sock=socket(AF_INET,SOCK_STREAM,0);
     if (sock>=0) {
-        const char *A="127.0.0.1";
+        struct addrinfo *res;
         struct sockaddr_in addr;
+        const char *LOCALHOST="127.0.0.1";
         memset(&addr,0,sizeof(addr));
-        addr.sin_addr.s_addr=inet_addr(A);
-        addr.sin_family=AF_INET;
         addr.sin_port=htons(port);
+        addr.sin_addr.s_addr=inet_addr(LOCALHOST);
+        addr.sin_family=AF_INET;
+        int ecode=getaddrinfo(hostname.toLatin1().constData(),nullptr,nullptr,&res);
+        if (ecode) {
+            qWarning("Failed to lookup hostname, '%s'.  rval=%d",qPrintable(hostname),ecode);
+        } else {
+            struct addrinfo *ai;
+            for (ai=res;ai;ai=ai->ai_next) {
+                if (ai->ai_family==PF_INET) {
+                    struct sockaddr_in *sa=reinterpret_cast<struct sockaddr_in *>(ai->ai_addr);
+                    addr.sin_family=AF_INET;
+                    addr.sin_addr.s_addr=sa->sin_addr.s_addr;
+                    break;
+                }
+            }
+        }
         if (::connect(sock,reinterpret_cast<struct sockaddr *>(&addr),sizeof(addr)))
-            qWarning("Failed to connect to %s:%d - %s",A,port,strerror(errno));
+            qWarning("Failed to connect to %s(%s):%d - %s",
+                     qPrintable(hostname),inet_ntoa(addr.sin_addr),port,strerror(errno));
         else {
             buffer.Attach(sock);
             if (verbose)
-                qDebug("Connected to %s:%d",A,port);
+                qDebug("Connected to %s(%s):%d",
+                       qPrintable(hostname),inet_ntoa(addr.sin_addr),port);
         }
     } else
         qWarning("Failed to create socket");
@@ -78,7 +96,7 @@ quint32 TcpRxSignalClient::ReceiveSamples(quint32 *samples,quint32 count,TimeTag
         while (recv<count) {
             quint32 amt=count-recv;
             if (partial==0) {
-                if (buffer.WaitForReadyReceive(100)) {
+                if (buffer.WaitForReadyReceive(500)) {
                     quint32 max;
                     const quint8 *buf=buffer.ReceiveStart(max);
                     Q_ASSERT((max%0x2000)==0);

@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2020 <+YOU OR YOUR COMPANY+>.
+ * Copyright 2020 Avid Systems, Inc.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ namespace gr {
      QQmlApplicationEngine *engine;
 
      public:
-      avs4000stat_impl(int dn);
+      avs4000stat_impl(const std::string &host,int dn);
       ~avs4000stat_impl();
 
       QWidget *qwidget();

@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2020 <+YOU OR YOUR COMPANY+>.
+ * Copyright 2020 Avid Systems, Inc.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,11 @@ namespace gr {
     {
      private:
         AVS4000Client *client;
+        QString host;
 	int dn;
         double rate,rxFreq,ddcFreq,ddcOutGain,rxRFBW;
+        int rfGain;
+        const char *gainMode;
         const char *startMode;
         const char *tbSource;
         const char *refMode;
@@ -46,7 +49,9 @@ namespace gr {
         qint16 *rBuf;
 
      public:
-      avs4000rx_impl(int dn,double rate, double rxFreq,double rxRFBW,
+      avs4000rx_impl(const std::string &host, int dn,
+                     double rate, double rxFreq,double rxRFBW,
+                     int rfGain,const char *gainMode,
                      double ddcFreq,double ddcOutGain,
                      const char *startMode, bool refMaster,
                      const char *tbSource,
