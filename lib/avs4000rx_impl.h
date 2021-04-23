@@ -64,6 +64,7 @@ namespace gr {
       virtual void SetRxFreq(double freq);
       virtual void SetDDCFreq(double freq);
       virtual void SetDDCOutGain(double val);
+      virtual void SetRxGain(int rfGain);
 
       // Where all the action really happens
       int work(int noutput_items,

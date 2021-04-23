@@ -67,6 +67,8 @@ public:
                   QString &errorDetails);
     bool UpdateRef(const char *refMode,const char *ppsSel,
                    const char *tbSrc,bool sysSync);
+    bool UpdateRef(const QString &refMode,const QString &ppsSel,
+                   const QString &tbSrc,bool sysSync);
     bool WaitForRefUpdate(quint32 &refCount,quint32 msTimeout=20000);
 
     bool IsConnected() const;
@@ -81,11 +83,11 @@ public slots:
     void DisconnectTx();
 
 protected:
-    bool SetTimebase(const char *tbSource);
-    bool SetRefMode(const char *refMode);
-    bool SetPPS(const char *refMode,const char *ppsSource);
+    bool SetTimebase(const QString &tbSource);
+    bool SetRefMode(const QString &refMode);
+    bool SetPPS(const QString &refMode, const QString &ppsSource);
     bool SetSysSync(bool sysSync);
-    bool CheckRefLock(const char *refMode);
+    bool CheckRefLock(const QString &refMode);
 
     QString hostname;
     TcpJSONClient *client;

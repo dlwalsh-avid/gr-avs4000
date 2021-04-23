@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QEventLoop>
 #include <QTimer>
+#include <QElapsedTimer>
 
 #ifdef AVSPROP
 #include "avscommon/Script.h"
@@ -17,6 +18,7 @@
 #endif
 
 bool TcpJSONClient::verbose=false;
+//bool TcpJSONClient::verbose=true;
 
 TcpJSONClient::TcpJSONClient(const QString &hostname, quint16 port) :
     QObject(nullptr)
@@ -33,11 +35,12 @@ TcpJSONClient::TcpJSONClient(const QString &hostname, quint16 port) :
     moveToThread(&thread);
     thread.start(QThread::HighPriority);
     emit Initialize();
+//    qDebug("TcpJSONClient constructor complete.");
 }
 
 TcpJSONClient::~TcpJSONClient()
 {
-//    qDebug("destructor..");
+//    qDebug("TcpJSONClient::destructor..");
     emit Uninitialize();
     QThread::msleep(1);
     thread.quit();
@@ -91,6 +94,16 @@ void TcpJSONClient::Init(Script *script)
                 "      api info [group]\n");
         cm->Add("geterr","api.GetErrCmd()","Get List of API Errors");
         cm->Add("getcmd","api.GetCmdCmd()","Get List of API Commands");
+        cm->Add("rd","api.ReadCmd(%S)","Read Register",
+                "Usage:\n"
+                "      api rd [group] [reg]   // Read a single register\n"
+                "Example:\n"
+                "      api rd fpga 0x3025     // Read FPGA Register\n");
+        cm->Add("wr","api.WriteCmd('%0','%1',%2)","Write Register",
+                "Usage:\n"
+                "      api wr <group> <reg> <val>\n"
+                "Example:\n"
+                "      api wr fpga 0x4003 8   // Write FPGA Register\n");
         script->GlobalCmd()->AddNested("api",cm,"API Parameter related commands");
 //    }
 }
@@ -104,7 +117,7 @@ void TcpJSONClient::Init()
         connect(timer,SIGNAL(timeout()),this,SLOT(SendBusyReq()));
         timer->setSingleShot(true);
     }
-//    qDebug("Init...");
+//    qDebug("TcpJSONClient::Init...");
 //    if (cfg->Get(nsTJSON).toBool()) {
         socket=new QTcpSocket();
         socket->setReadBufferSize(64*1024);
@@ -113,19 +126,20 @@ void TcpJSONClient::Init()
         if (!socket->waitForConnected(5000))
             qWarning("failed to connect to server");
         else {
-    //        emit Connected();
+//            emit Connected();
             qDebug("Connected to %s:%d",qPrintable(hostname),port);
         }
         connect(socket,SIGNAL(readyRead()),this,SLOT(ReadAvailable()));
         connect(socket,SIGNAL(disconnected()),this,SLOT(Disconnected()));
         emit Connected();
+//        qDebug("TcpJSONCient: emit connected=%d",IsConnected());
 //    } else
 //        qWarning("Not enabled.");
 }
 
 void TcpJSONClient::Uninit()
 {
-//    qDebug("Uninit...");
+//    qDebug("TcpJSONClient::Uninit...");
     if (socket) {
         disconnect(socket,SIGNAL(readyRead()),this,SLOT(ReadAvailable()));
         disconnect(socket,SIGNAL(disconnected()),this,SLOT(Disconnected()));
@@ -139,6 +153,13 @@ void TcpJSONClient::Uninit()
         delete timer;
         timer=nullptr;
     }
+}
+
+bool TcpJSONClient::IsConnected() const
+{
+    if (socket)
+        return socket->isValid();
+    return false;
 }
 
 void TcpJSONClient::Disconnected()
@@ -161,6 +182,7 @@ void TcpJSONClient::SendREQ(const QVariant &req)
 void TcpJSONClient::WriteREQ(const QVariant &req)
 {
     rsp.clear();    // clear RSP
+//    qDebug("rsp.isValid=%d",rsp.isValid());
     QJsonDocument doc=QJsonDocument::fromVariant(req);
     QByteArray bytes=doc.toJson(QJsonDocument::Compact);
     if (verbose)
@@ -206,26 +228,50 @@ void TcpJSONClient::ReadAvailable()
         qWarning("Invalid socket");
 }
 
-bool TcpJSONClient::IsConnected() const {
-    return (socket && socket->isValid());
-}
 
 bool TcpJSONClient::WaitForConnected(int msTimeout)
 {
+#if QT_VERSION < QT_VERSION_CHECK(5,9,0)
+    QElapsedTimer timer;
+    timer.start();
+    while (timer.elapsed()<qint64(msTimeout)) {
+        if (IsConnected()) break;
+        QThread::msleep(1);
+    }
+#else
     QEventLoop loop;
-    connect(this,SIGNAL(Connected()),&loop,SLOT(quit()));
-    QTimer::singleShot(msTimeout,&loop,SLOT(quit()));
-    if (!(socket && socket->isValid()))
-        loop.exec();
-    return (socket && socket->isValid());
+    connect(this,&TcpJSONClient::Connected,&loop,&QEventLoop::quit,Qt::QueuedConnection);
+//    connect(this,&TcpJSONClient::Connected,this,&TcpJSONClient::TestSlot,Qt::QueuedConnection);
+    QTimer::singleShot(msTimeout,&loop,&QEventLoop::quit);
+    qDebug("TcpJSONClient::WaitForConnected: msTimeout=%d",msTimeout);
+    qDebug("Loop Level=%d",QThread::currentThread()->loopLevel());
+    if (IsConnected()) return true;
+    qDebug("loop.exec()");
+    loop.exec();
+#endif
+//    qDebug("isConnected=%d",IsConnected());
+    return IsConnected();
 }
 
 bool TcpJSONClient::WaitForResponse(int msTimeout)
 {
+#if QT_VERSION < QT_VERSION_CHECK(5,9,0)
+    QElapsedTimer timer;
+    timer.start();
+    while (timer.elapsed()<qint64(msTimeout)) {
+//        mutex.lock();
+        bool valid=rsp.isValid();
+//        mutex.unlock();
+        if (valid) break;
+        QThread::msleep(1);
+    }
+//    qDebug("elapsed %d ms",int(timer.elapsed()));
+#else
     QEventLoop loop;
     connect(this,SIGNAL(ResponseAvailable()),&loop,SLOT(quit()));
     QTimer::singleShot(msTimeout,&loop,SLOT(quit()));
     loop.exec();
+#endif
     return rsp.isValid();
 }
 
@@ -258,6 +304,7 @@ void TcpJSONClient::BusyREQ(const QVariantList &req)
 bool TcpJSONClient::Call(const QString &cmd, const QVariant &arg, QVariant &rval,
                            quint32 &errorCode, QString &errorDetails, int msTimeout)
 {
+//    qDebug("Call");
     bool success=false;
     QVariantList req;
     req.append(QVariant(cmd));
@@ -267,15 +314,20 @@ bool TcpJSONClient::Call(const QString &cmd, const QVariant &arg, QVariant &rval
         // Dont send the request but instead queue it as a Busy REQ
         // This will start a timer.  When the timer expires the request will be
         // sent.
+//        qDebug("Busy!");
         emit Busy(req);
         return true;
     }
     busyMutex.lock();
     busyReq.clear();    // clears any pending busy request
     busyMutex.unlock();
+    rsp.clear();    // SendREQ is implemented via Signal/Slot which can cause RSP to
+                    // NOT be cleared before WaitForResponse is called, this will
+                    // cause WaitForResponse to return immediately.
     SendREQ(req);
     rval.clear();
     if (WaitForResponse(msTimeout)) {
+//        qDebug("Got RSP");
         if (rsp.type()==QVariant::Bool)
             return rsp.toBool();
         QVariantList list=rsp.toList();
@@ -295,6 +347,7 @@ bool TcpJSONClient::Call(const QString &cmd, const QVariant &arg, QVariant &rval
         errorCode=apiTimeout;
         errorDetails="No Response";
     }
+//    qDebug("CMD: %s success=%d",qPrintable(cmd),success);
     mutex.unlock();
     return success;
 }
@@ -458,6 +511,36 @@ QString TcpJSONClient::DiscardCmd()
     return out;
 }
 
+QString TcpJSONClient::ValToString(QVariant val) const
+{
+    QString str;
+//    qDebug("type=%s",val.typeName());
+    if (val.type()==QVariant::Bool)
+        str=val.toBool()?"true":"false";
+    // Unfortunately the following doesn't work.
+    // All numbers seem to come out of the JSON Parser
+    // as doubles. -dlw 12/15/20
+    else if (val.type()==QVariant::UInt || val.type()==QVariant::Int)
+        str.sprintf("0x%02X (%d)",val.toUInt(),val.toUInt());
+//    else if (val.type()==QVariant::Int)
+//        str.sprintf("%d",val.toInt());
+    else if (val.type()==QVariant::String)
+        str=val.toString();
+    else if (val.type()==QVariant::List) {
+        QVariantList list=val.toList();
+        str="[";
+        for (int i=0;i<list.count();i++) {
+            if (i>0) str+=",";
+            str+=ValToString(list.at(i));
+        }
+        str+="]";
+    } else //if (val.type()==QVariant::Double)
+        str=val.toString();
+    // might need to extend for lists or maps
+
+    return str;
+}
+
 QString TcpJSONClient::DisplayConfig(const QVariantMap &map)
 {
     QString out;
@@ -469,20 +552,8 @@ QString TcpJSONClient::DisplayConfig(const QVariantMap &map)
         foreach(param,params.keys()) {
             QString name;
             name.sprintf("%s.%s",qPrintable(group),qPrintable(param));
-            QString str;
             QVariant val=params.value(param);
-            if (val.type()==QVariant::Bool)
-                str=val.toBool()?"true":"false";
-            else if (val.type()==QVariant::UInt)
-                str.sprintf("0x%02X (%d)",val.toUInt(),val.toUInt());
-            else if (val.type()==QVariant::Int)
-                str.sprintf("%d",val.toInt());
-            else if (val.type()==QVariant::String)
-                str=val.toString();
-            else //if (val.type()==QVariant::Double)
-                str=val.toString();
-//            line.sprintf("%25s = %s (%s)\n",
-//                         qPrintable(name),qPrintable(str),val.typeName());
+            QString str=ValToString(val);
             line.sprintf("%25s = %s\n",
                          qPrintable(name),qPrintable(str));
             out+=line;
@@ -555,4 +626,31 @@ QString TcpJSONClient::APICall(const QString &hostname,
     }
     out.sprintf("Failed to send");
     return out;
+}
+
+QString TcpJSONClient::ReadCmd(const QString &grp,const QVariant &arg)
+{
+    quint32 ec;
+    QString estr;
+    QVariantList list;
+    list.append(grp);
+    list.append(arg);
+    QVariant rval;
+    if (Call("RD",list,rval,ec,estr))
+        return ValToString(rval);
+    return estr;
+}
+
+QString TcpJSONClient::WriteCmd(const QString &grp,const QVariant &arg,const QVariant &val)
+{
+    quint32 ec;
+    QString estr;
+    QVariantList list;
+    list.append(grp);
+    list.append(arg);
+    list.append(val);
+    QVariant rval;
+    if (Call("WR",list,rval,ec,estr))
+        return "Written.";
+    return estr;
 }

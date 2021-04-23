@@ -68,6 +68,7 @@ signals:
     void ResponseAvailable();
     void Busy(const QVariantList &list);
 
+
 public slots:
     QVariant GetParam(const QString &param,quint32 &errorCode,QString &errorDetails);
     QVariantMap Get(const QString &group,quint32 &errorCode,QString &errorDetails);
@@ -90,6 +91,12 @@ public slots:
     bool IsConnected() const;
     void SendBusyReq();
 
+//    bool Read(QVariant &val,const QVariant arg,quint32 &errorCode,QString &errorDetails);
+//    bool Write(QVariant arg,quint32 &errorCode,QString &errorDetails);
+
+    QString ReadCmd(const QString &grp,const QVariant &arg);
+    QString WriteCmd(const QString &grp,const QVariant &arg,const QVariant &val);
+
 protected slots:
     void Init();
     void Uninit();
@@ -100,6 +107,7 @@ protected slots:
     void BusyREQ(const QVariantList &req);
 
 protected:
+    QString ValToString(QVariant val) const;
     QString DisplayConfig(const QVariantMap &map);
     void SendREQ(const QVariant &req);
     bool WaitForResponse(int msTimeout);

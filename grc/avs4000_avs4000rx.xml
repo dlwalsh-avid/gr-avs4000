@@ -13,6 +13,7 @@
   <callback>SetRxFreq($rxFreq)</callback>
   <callback>SetDDCFreq($ddcFreq)</callback>
   <callback>SetDDCOutGain($ddcOutGain)</callback>
+  <callback>SetRxGain($rfGain)</callback>
   <param>
           <name>Host</name>
           <key>host</key>

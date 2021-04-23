@@ -338,8 +338,8 @@ bool AVS4000Client::SetParam(const QString &param, QVariant val, quint32 &errorC
      return client->SetParam(param,val,errorCode,errorDetails);
 }
 
-bool AVS4000Client::SetTimebase(const char *tbSource) {
-    if (tbSource) {
+bool AVS4000Client::SetTimebase(const QString &tbSource) {
+    if (tbSource.length()>0) {
         quint32 ecode;
         QString details;
         QString param;
@@ -352,8 +352,8 @@ bool AVS4000Client::SetTimebase(const char *tbSource) {
     return false;
 }
 
-bool AVS4000Client::SetRefMode(const char *refMode) {
-    if (refMode) {
+bool AVS4000Client::SetRefMode(const QString &refMode) {
+    if (refMode.length()>0) {
         quint32 ecode;
         QString details;
         QString param;
@@ -366,12 +366,12 @@ bool AVS4000Client::SetRefMode(const char *refMode) {
     return false;
 }
 
-bool AVS4000Client::SetPPS(const char *refMode,const char *ppsSource) {
-    if (refMode) {
+bool AVS4000Client::SetPPS(const QString &refMode,const QString &ppsSource) {
+    if (refMode.length()>0 && ppsSource.length()>0) {
         // if GPSDO or PPS modes then we don't set the PPS but return true
         // so the startup process may continue
-        if (strcasecmp(refMode,"GPSDO")==0) return true;
-        if (strcasecmp(refMode,"PPS")==0) return true;
+        if (refMode.compare("GPSDO",Qt::CaseInsensitive)==0) return true;
+        if (refMode.compare("PPS",Qt::CaseInsensitive)==0) return true;
         quint32 ecode;
         QString details;
         QString param;
@@ -384,11 +384,11 @@ bool AVS4000Client::SetPPS(const char *refMode,const char *ppsSource) {
     return false;
 }
 
-bool AVS4000Client::CheckRefLock(const char *refMode) {
-    if (!refMode) return false;
+bool AVS4000Client::CheckRefLock(const QString &refMode) {
+    if (refMode.length()==0) return false;
     // pretend we are locked if internal mode
-    if (strcasecmp(refMode,"internal")==0) return true;
-    if (strcasecmp(refMode,"internalstatic")==0) return true;
+    if (refMode.compare("internal",Qt::CaseInsensitive)==0) return true;
+    if (refMode.compare("internalstatic",Qt::CaseInsensitive)==0) return true;
     quint32 ecode;
     QString details;
     QVariant lock=GetParam("ref.lock",ecode,details);
@@ -412,8 +412,14 @@ bool AVS4000Client::SetSysSync(bool sysSync) {
     return rval;
 }
 
-bool AVS4000Client::UpdateRef(const char *refMode,const char *ppsSel,
-                              const char *tbSrc,bool sysSync)
+bool AVS4000Client::UpdateRef(const char *refMode, const char *ppsSel,
+                              const char *tbSrc, bool sysSync)
+{
+    return UpdateRef(QString(refMode),QString(ppsSel),QString(tbSrc),sysSync);
+}
+
+bool AVS4000Client::UpdateRef(const QString &refMode, const QString &ppsSel,
+                              const QString &tbSrc, bool sysSync)
 {
     QElapsedTimer et;
     et.start();

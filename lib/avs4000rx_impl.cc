@@ -177,6 +177,19 @@ namespace gr {
         return rval;
     }
 
+    void avs4000rx_impl::SetRxGain(int rfGain)
+    {
+        quint32 ecode;
+        QString details;
+        QString param;
+        param.sprintf("%s.%s",gRX,pGain);
+        bool rval=client->SetParam(param,QVariant(rfGain),ecode,details);
+        if (!rval && ecode!=apiBusy)
+            qWarning("SetRFGain Failed: %s",qPrintable(details));
+        else
+            this->rfGain=rfGain;
+    }
+
     void avs4000rx_impl::SetRxFreq(double freq)
     {
         quint32 ecode;
@@ -236,8 +249,10 @@ namespace gr {
         rx.insert(pFreq,rxFreq);
         rx.insert(pStartMode,startMode);
         rx.insert(pRFBW,rxRFBW);
-        rx.insert(pGain,rfGain);
         rx.insert(pGainMode,gainMode);
+        if (strcasecmp(gainMode,"Manual")==0)
+            // Only insert Gain if in Manual mode
+            rx.insert(pGain,rfGain);
         map.insert(gRX,rx);
         QVariantMap ddc;
         ddc.insert(pFreq,ddcFreq);
