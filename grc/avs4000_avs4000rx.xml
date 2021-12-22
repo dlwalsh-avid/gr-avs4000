@@ -9,7 +9,7 @@
                           $rfGain, $gainMode,
                           $ddcFreq, $ddcOutGain,
                           $startMode, $refMaster,
-                          $tbSrc,$refMode,$ppsSel,$sysSync)</make>
+                          $tbSrc,$refMode,$ppsSel,$sysSync,$useFracSec)</make>
   <callback>SetRxFreq($rxFreq)</callback>
   <callback>SetDDCFreq($ddcFreq)</callback>
   <callback>SetDDCOutGain($ddcOutGain)</callback>
@@ -133,8 +133,12 @@
             <key>"InternalStatic"</key>
           </option>
           <option>
-            <name>External</name>
-            <key>"External"</key>
+            <name>Ext 10MHz</name>
+            <key>"External10"</key>
+          </option>
+          <option>
+            <name>Ext 100MHz</name>
+            <key>"External100"</key>
           </option>
           <option>
             <name>GPSDO</name>
@@ -203,6 +207,20 @@
             all
           #end if
           </hide>
+          <option>
+            <name>Disable</name>
+            <key>False</key>
+          </option>
+          <option>
+            <name>Enable</name>
+            <key>True</key>
+          </option>
+  </param>
+  <param>
+          <name>Use Fractional Sec</name>
+          <key>useFracSec</key>
+          <value>Enable</value>
+          <type>enum</type>
           <option>
             <name>Disable</name>
             <key>False</key>

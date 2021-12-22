@@ -26,7 +26,7 @@ public:
     virtual bool IsConnected() const { return (sock>=0); }
     virtual bool WaitForReadyReceive(quint32 msTimeout) { return buffer.WaitForReadyReceive(msTimeout); }
     virtual quint32 Receive(quint8 *data, quint32 len);
-    virtual quint32 ReceiveSamples(quint32 *samples, quint32 count,TimeTag *t=nullptr);
+    virtual quint32 ReceiveSamples(quint32 *samples, quint32 count,QList<TimeTag> &tList);
 
 signals:
 

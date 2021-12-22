@@ -22,7 +22,7 @@ Window {
         anchors.bottomMargin: 2
         anchors.fill: parent
         columns: (width<height)?1:3
-        rows: (width<height)?30:10
+        rows: (width<height)?33:11
         columnSpacing: 2
         rowSpacing: 1
         flow: GridLayout.TopToBottom
@@ -41,7 +41,9 @@ Window {
         ParamBox { id: rxFreq; name: "RX Freq:" }
         ParamBox { id: rxSampleRate; name: "RX Samp Rate:" }
         ParamBox { id: rxRealSampleRate; name: "RX Real Samp Rate:" }
-        ParamBox { id: ddcDec; name: "DDC Dec:" }
+        ParamBox { id: ddcFreq; name: "DDC Freq:" }
+        ParamBox { id: ddcRealFreq; name: "DDC Real Freq:" }
+//        ParamBox { id: ddcDec; name: "DDC Dec:" }
         ParamBox { id: rxConEnable; name: "RX Con Enable:" }
         ParamBox { id: rxRun; name: "RX Run:" }
         ParamBox { id: rxSamples; name: "RX Samples:" }
@@ -51,7 +53,9 @@ Window {
         ParamBox { id: txFreq; name: "TX Freq:" }
         ParamBox { id: txSampleRate; name: "TX Samp Rate:" }
         ParamBox { id: txRealSampleRate; name: "TX Real Samp Rate:" }
-        ParamBox { id: ducInterp; name: "DUC Interp:" }
+        ParamBox { id: ducFreq; name: "DUC Freq:" }
+        ParamBox { id: ducRealFreq; name: "DUC Real Freq:" }
+//        ParamBox { id: ducInterp; name: "DUC Interp:" }
         ParamBox { id: txConEnable; name: "TX Con Enable:" }
         ParamBox { id: txRun; name: "TX Run:" }
         ParamBox { id: txSamples; name: "TX Samples:" }
@@ -90,19 +94,21 @@ Window {
                     masterSRMode.value=API.cfg.master.SampleRateMode
                     masterSampleRate.value=(API.cfg.master.SampleRate/1e6).toFixed(6) + " MHz";
                     masterRealSampleRate.value=(API.cfg.master.RealSampleRate/1e6).toFixed(6) + " MHz";
-                    rxFreq.value=(API.cfg.rx.Freq/1e6).toFixed(1) + " MHz";
+                    rxFreq.value=(API.cfg.rx.Freq/1e6).toFixed(6) + " MHz";
                     rxSampleRate.value=(API.cfg.rx.SampleRate/1e6).toFixed(6) + " MHz";
                     rxRealSampleRate.value=(API.cfg.rx.RealSampleRate/1e6).toFixed(6) + " MHz";
-                    ddcDec.value=API.cfg.ddc.Decimation
+                    ddcFreq.value=API.cfg.ddc.Freq
+                    ddcRealFreq.value=API.cfg.ddc.RealFreq
                     rxConEnable.valColor=(API.cfg.rxdata.ConEnable)?'lime':'red'
                     rxConEnable.value=API.cfg.rxdata.ConEnable
                     rxRun.valColor=API.cfg.rxdata.Run?"lime":"red"
                     rxRun.value=API.cfg.rxdata.Run
 
-                    txFreq.value=(API.cfg.tx.Freq/1e6).toFixed(1) + " MHz";
+                    txFreq.value=(API.cfg.tx.Freq/1e6).toFixed(6) + " MHz";
                     txSampleRate.value=(API.cfg.tx.SampleRate/1e6).toFixed(6) + " MHz";
                     txRealSampleRate.value=(API.cfg.tx.RealSampleRate/1e6).toFixed(6) + " MHz";
-                    ducInterp.value=API.cfg.duc.Interpolation
+                    ducFreq.value=API.cfg.duc.Freq
+                    ducRealFreq.value=API.cfg.duc.RealFreq
                     txConEnable.value=API.cfg.txdata.ConEnable
                     txConEnable.valColor=API.cfg.txdata.ConEnable?"lime":"red"
                     txRun.value=API.cfg.txdata.Run

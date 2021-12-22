@@ -82,16 +82,17 @@ void TcpRxSignalClient::Flush()
 
 quint32 TcpRxSignalClient::Receive(quint8 *data,quint32 len)
 {
-    quint32 scount=ReceiveSamples(reinterpret_cast<quint32*>(data),len/sizeof(quint32));
+    QList<TimeTag> tList;
+    quint32 scount=ReceiveSamples(reinterpret_cast<quint32*>(data),len/sizeof(quint32),tList);
     return scount*sizeof(quint32);
 }
 
-quint32 TcpRxSignalClient::ReceiveSamples(quint32 *samples,quint32 count,TimeTag *t)
+quint32 TcpRxSignalClient::ReceiveSamples(quint32 *samples, quint32 count, QList<RxSignalClient::TimeTag> &tList)
 {
     quint32 recv=0;
     //qDebug("ReceiveSamples: count=%d v49=%d",count,useV49);
     if (useV49) {
-        if (t) t->valid=false;
+        tList.clear();
         const quint32 pktSize=0x2000;   // 8KB packets
         while (recv<count) {
             quint32 amt=count-recv;
@@ -104,15 +105,18 @@ quint32 TcpRxSignalClient::ReceiveSamples(quint32 *samples,quint32 count,TimeTag
                     packet.Init(buf,pktSize);
                     if (!packet.IsValid())
                         qWarning("Invalid packet!");
-                    if (t && !t->valid) {
-                        t->valid=true;
-                        t->offset=recv;
-                        t->timeInt=packet.TimeInteger();
-                        t->timeFrac=packet.TimeFraction();
-                    }
+                    TimeTag t;
+                    t.valid=true;
+                    t.offset=recv;
+//                    qDebug("offset=%d  len=%d",t.offset,packet.SamplesLen());
+                    t.timeInt=packet.TimeInteger();
+                    t.timeFrac=packet.TimeFraction();
+                    tList.append(t);
                 } else
                     break;
             }
+//            else
+//                qDebug("Rx::ReceiveSamples: partial=%d",partial);
             const quint32 *sbuf=packet.Samples();
             quint32 scount=packet.SamplesLen();
             if (amt>(scount-partial))

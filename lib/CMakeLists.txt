@@ -47,6 +47,7 @@ list(APPEND avs4000_sources
     v49packet.cpp
     TcpJSONClient.cpp
     avs4000stat_impl.cc
+    avs4000ctrl_impl.cc
     avsapicon.cpp
     qml.qrc
 )

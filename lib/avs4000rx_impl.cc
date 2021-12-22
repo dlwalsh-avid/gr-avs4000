@@ -69,7 +69,7 @@ namespace gr {
                     double ddcFreq,double ddcOutGain,
                     const char *startMode,bool refMaster,
                     const char *tbSource,const char *refMode,
-                    const char *ppsSource,bool sysSync)
+                    const char *ppsSource,bool sysSync,bool useFracSec)
     {
       return gnuradio::get_initial_sptr
         (new avs4000rx_impl(host,dn,
@@ -77,7 +77,7 @@ namespace gr {
                             rfGain,gainMode,
                             ddcFreq,ddcOutGain,
                             startMode,refMaster,
-                            tbSource,refMode,ppsSource,sysSync));
+                            tbSource,refMode,ppsSource,sysSync,useFracSec));
     }
 
     /*
@@ -92,7 +92,7 @@ namespace gr {
                                    const char *tbSource,
                                    const char *refMode,
                                    const char *ppsSource,
-                                   bool sysSync)
+                                   bool sysSync,bool useFracSec)
       : gr::sync_block("avs4000rx",
               gr::io_signature::make(0,0,0),
               gr::io_signature::make(1, 1, sizeof(gr_complex)))
@@ -116,6 +116,8 @@ namespace gr {
         this->ppsSource=ppsSource;
         this->sysSync=sysSync;
         this->updateCount=0;
+        this->useFracSec=useFracSec;
+        this->masterSampleRate=0.0;
     }
 
     /*
@@ -134,25 +136,50 @@ namespace gr {
     {
         gr_complex *out = (gr_complex *) output_items[0];
         quint32 samples=(noutput_items>BUFFER_SAMPLES)?BUFFER_SAMPLES:noutput_items;
-        TcpRxSignalClient::TimeTag t;
+        QList<TcpRxSignalClient::TimeTag> tList;
+        //TcpRxSignalClient::TimeTag t;
         static quint32 lastSec=0;
         if (client==nullptr || client->rxSig==nullptr) return -1;
         quint32 rval=client->rxSig->ReceiveSamples(reinterpret_cast<quint32*>(rBuf),
-                                                   samples,&t);
+                                                   samples,tList);
         if (rval!=samples) {
             qWarning("Only recv %d out %d samples",rval,samples);
             return -1;
         }
-        if (t.valid) {
-            const pmt::pmt_t val=pmt::make_tuple(pmt::from_long(long(t.timeInt)),
-                                                 pmt::from_uint64(t.timeFrac));
-            add_item_tag(0,                                // Port Number
-                         nitems_written(0)+t.offset,       // Sample offset
-                         pmt::string_to_symbol("rx_time"), // Key
-                         val,id);                          // Value
-            if (t.timeInt!=lastSec) {
-                lastSec=t.timeInt;
-//                qDebug("tag %d",lastSec);
+        for (int i=0;i<tList.count();i++) {
+            TcpRxSignalClient::TimeTag t=tList.at(i);
+            if (t.valid) {
+                pmt::pmt_t val;
+                if (useFracSec) {
+                    if (masterSampleRate==0.0) {
+                        quint32 ec;
+                        QString details;
+                        masterSampleRate=client->GetRealMasterSampleRate(ec,details);
+//                        if (ec!=0)
+//                            qWarning("Get Master Sample Rate Failed: %s (%d)",qPrintable(details),ec);
+//                        if (masterSampleRate==0.0)
+//                            qWarning("Master Sample Rate is zero!!");
+                    }
+                    if (masterSampleRate>0) {
+                        val=pmt::make_tuple(pmt::from_long(long(t.timeInt)),
+                                            pmt::from_double(double(t.timeFrac)/(2*masterSampleRate)));
+                        add_item_tag(0,                                // Port Number
+                                     nitems_written(0)+t.offset,       // Sample offset
+                                     pmt::string_to_symbol("rx_time"), // Key
+                                     val,id);                          // Value
+                    }
+                } else {
+                    val=pmt::make_tuple(pmt::from_long(long(t.timeInt)),
+                                                     pmt::from_uint64(t.timeFrac));
+                    add_item_tag(0,                                // Port Number
+                                 nitems_written(0)+t.offset,       // Sample offset
+                                 pmt::string_to_symbol("rx_time"), // Key
+                                 val,id);                          // Value
+                }
+                if (t.timeInt!=lastSec) {
+                    lastSec=t.timeInt;
+    //                qDebug("tag %d",lastSec);
+                }
             }
         }
         for (int i=0;i<samples;i++) {

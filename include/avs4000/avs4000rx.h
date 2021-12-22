@@ -49,13 +49,13 @@ namespace gr {
       static sptr make(const std::string &host,int dn,
                        double rate,double rxFreq,double rxRFBW,
                        int rfGain,const char *gainMode,
-		       double ddcFreq,double ddcOutGain,
+                       double ddcFreq,double ddcOutGain,
                        const char *startMode,
                        bool refMaster,
                        const char *tbSource,
                        const char *refMode=nullptr,
                        const char *ppsSource=nullptr,
-                       bool sysSync=false);
+                       bool sysSync=false,bool useFracSec=true);
       virtual void SetRxFreq(double freq)=0;
       virtual void SetRxGain(int rfGain)=0;
       virtual void SetDDCFreq(double freq)=0;

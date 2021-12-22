@@ -7,6 +7,7 @@
 #define RXSIGCLIENT_H
 
 #include <QObject>
+#include <QList>
 
 class RxSignalClient : public QObject
 {
@@ -26,7 +27,7 @@ public:
     virtual bool IsConnected() const=0;
     virtual bool WaitForReadyReceive(quint32 msTimeout)=0;
     virtual quint32 Receive(quint8 *data, quint32 len)=0;
-    virtual quint32 ReceiveSamples(quint32 *samples,quint32 count,TimeTag *t)=0;
+    virtual quint32 ReceiveSamples(quint32 *samples,quint32 count,QList<TimeTag> &tList)=0;
 signals:
 public slots:
 protected:

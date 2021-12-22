@@ -29,6 +29,7 @@ static const char *pUseV49="UseV49";
 static const char *pUseBigEndian="UseBE";
 static const char *pTestPattern="TestPattern";
 static const char *pSampleRate="SampleRate";
+static const char *pRealSampleRate="RealSampleRate";
 static const char *pTimeBase="TimeBase";
 static const char *pPPSSel="PPSSel";
 static const char *pMode="Mode";
@@ -109,6 +110,15 @@ bool AVS4000Client::SetMasterSampleRate(quint32 val,quint32 &errorCode,QString &
     grp.insert(pSampleRate,val);
     map.insert(gMaster,grp);
     return Set(map,errorCode,errorDetails);
+}
+
+double AVS4000Client::GetRealMasterSampleRate(quint32 &errorCode,QString &errorDetails)
+{
+    QVariantMap map=Get(gMaster,errorCode,errorDetails);
+    if (map.contains(pRealSampleRate))
+        return map.value(pRealSampleRate).toDouble();
+    qDebug("%s %d",pRealSampleRate,map.contains(pRealSampleRate));
+    return 0;
 }
 
 bool AVS4000Client::StartRxData(bool testPatternEnable,

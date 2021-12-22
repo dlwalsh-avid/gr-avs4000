@@ -356,8 +356,11 @@ QVariantMap TcpJSONClient::Get(const QString &group, quint32 &errorCode, QString
 {
 //    QString out;
     QVariant rval;
-    if (Call("GET",QVariant(group),rval,errorCode,errorDetails))
-        return rval.toMap();
+    if (Call("GET",QVariant(group),rval,errorCode,errorDetails)) {
+        QVariantMap map=rval.toMap();
+        if (map.contains(group))
+            return map.value(group).toMap();
+    }
     return QVariantMap();
 }
 
@@ -375,9 +378,12 @@ QString TcpJSONClient::GetCmd(const QString &group)
     quint32 ec;
     QString estr;
     QVariant rval;
-    if (Call("GET",QVariant(group),rval,ec,estr))
-        out=DisplayConfig(rval.toMap());
-    else
+    if (Call("GET",QVariant(group),rval,ec,estr)) {
+        if (rval.type()==QVariant::Map)
+            out=DisplayConfig(rval.toMap());
+        else
+            out=rval.toString();
+    } else
         out.sprintf("Error %u: %s",ec,qPrintable(estr));
     return out;
 }

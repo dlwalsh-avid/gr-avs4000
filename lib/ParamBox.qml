@@ -12,7 +12,7 @@ Rectangle {
     color: "#202020"
     property alias name: name.text
     property alias value: value.text
-    property var size: width/20
+    property var size: width/22
     property color valColor: "lime"
     property color nameColor: "white"
     Layout.fillWidth: true
@@ -36,7 +36,7 @@ Rectangle {
         font.pixelSize: parent.size
         color: parent.valColor
         anchors.left: parent.horizontalCenter
-        anchors.leftMargin: parent.width/10
+        anchors.leftMargin: parent.width/15
         anchors.verticalCenter: parent.verticalCenter
         Layout.minimumHeight: font.pixelSize
     }

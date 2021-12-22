@@ -34,6 +34,8 @@ public:
     quint32 GetMasterSampleRate(quint32 &errorCode,QString &errorDetails);
     bool SetMasterSampleRate(quint32 val,quint32 &errorCode,QString &errorDetails);
 
+    double GetRealMasterSampleRate(quint32 &errorCode,QString &errorDetails);
+
     bool StartRxData(bool testPatternEnable,
                      quint32 &errorCode,QString &errorDetails);
     bool StopRxData(quint32 &errorCode,QString &errorDetails);
