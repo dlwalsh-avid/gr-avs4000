@@ -18,7 +18,6 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
-    avs4000_avs4000ctrl.xml
     avs4000_avs4000rx.xml
     avs4000_avs4000tx.xml
     avs4000_avs4000stat.xml DESTINATION share/gnuradio/grc/blocks
