@@ -11,7 +11,6 @@
 #include "avs4000/avs4000rx.h"
 #include "avs4000/avs4000tx.h"
 #include "avs4000/avs4000stat.h"
-#include "avs4000/avs4000ctrl.h"
 %}
 
 
@@ -21,6 +20,4 @@ GR_SWIG_BLOCK_MAGIC2(avs4000, avs4000rx);
 GR_SWIG_BLOCK_MAGIC2(avs4000, avs4000tx);
 %include "avs4000/avs4000stat.h"
 GR_SWIG_BLOCK_MAGIC2(avs4000, avs4000stat);
-%include "avs4000/avs4000ctrl.h"
-GR_SWIG_BLOCK_MAGIC2(avs4000, avs4000ctrl);
 
