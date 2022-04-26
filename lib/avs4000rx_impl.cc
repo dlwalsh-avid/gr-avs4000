@@ -294,6 +294,12 @@ namespace gr {
         }
         if (!rval)
             qWarning("Rx Startup Failed: %s",qPrintable(details));
+        else
+            // the following delay may only be needed for onPPS & onTime
+            // start Mode.  The following will wait until we know
+            // RX Data is flowing.
+            rval=client->WaitForRxData();
+
         return rval;
     }
 

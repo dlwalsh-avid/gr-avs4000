@@ -22,7 +22,7 @@ Window {
         anchors.bottomMargin: 2
         anchors.fill: parent
         columns: (width<height)?1:3
-        rows: (width<height)?33:11
+        rows: (width<height)?37:12
         columnSpacing: 2
         rowSpacing: 1
         flow: GridLayout.TopToBottom
@@ -61,13 +61,18 @@ Window {
         ParamBox { id: txSamples; name: "TX Samples:" }
         ParamBox { id: txRate; name: "TX Rate:" }
         ParamBox { id: txUnderruns; name: "TX Underruns:" }
+
+        ParamBox { id: refMode; name: "Ref Mode:" }
+        ParamBox { id: refLock; name: "Ref Lock:" }
+        ParamBox { id: gpsFix; name: "GPS Fix:" }
+        ParamBox { id: ppsLOS; name: "PPS LOS:" }
     }
 
     Timer {
         property int commitCount: -1
         interval: 1000; running: true;repeat: true
         onTriggered: {
-            var cfg=API.get(["sysstat","rxstat","txstat"]);
+            var cfg=API.getAll();
             dn.value=cfg.sysstat.DN;
             sn.value=cfg.sysstat.SN;
             tempBoard.value=cfg.sysstat.BoardTemp.toFixed(2) + " C";
@@ -84,6 +89,22 @@ Window {
             rxDrops.valColor=(cfg.rxstat.Overflow>0)?"red":"lime"
             txUnderruns.value=cfg.txstat.Underflow
             txUnderruns.valColor=(cfg.txstat.Underflow>0)?"red":"lime"
+            refLock.value=cfg.ref.Lock?"Locked":"Unlocked";
+            refLock.valColor=(cfg.ref.Lock)?"lime":"red";
+            ppsLOS.value=cfg.gpsdo.PPSLOS
+            ppsLOS.valColor=(cfg.gpsdo.PPSLOS)?"red":"lime";
+            if (cfg.gps.FixType===0)
+                gpsFix.value="No Fix";
+            else if (cfg.gps.FixType===1)
+                gpsFix.value="Dead Reckoning Only";
+            else if (cfg.gps.FixType===2)
+                gpsFix.value="2D-Fix";
+            else if (cfg.gps.FixType===3)
+                gpsFix.value="3D-Fix";
+            else if (cfg.gps.FixType===4)
+                gpsFix.value="GNSS + Dead Reckoning";
+            else
+                gpsFix.value="Unknown";
 //            ref.value=API.cfg.ref.Time.toString();
             if (commitCount<cfg.sysstat.CommitCount) {
                 API.update();
@@ -114,6 +135,7 @@ Window {
                     txRun.value=API.cfg.txdata.Run
                     txRun.valColor=API.cfg.txdata.Run?"lime":"red"
                     commitCount=cfg.sysstat.CommitCount;
+                    refMode.value=API.cfg.ref.Mode
                 }
             } else if (cfg.sysstat.CommitCount>0)
                 commitCount=cfg.sysstat.CommitCount;

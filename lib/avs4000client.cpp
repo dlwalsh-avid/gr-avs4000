@@ -166,12 +166,13 @@ bool AVS4000Client::ConnectRxTcp(const QString &hostname,quint16 port,
         map.insert(gRXDATA,grp);
         bool rval=Set(map,errorCode,errorDetails);
         if (rval) {
-//            qDebug("Connecting TCP RX signal...");
+            qDebug("Connecting TCP RX signal...");
             QThread::msleep(100);
             this->rxSig=new TcpRxSignalClient(useVita49,hostname,port);
-    //        QThread::msleep(100);
+//            QThread::msleep(100);
 //            rval=this->rxSig->WaitForConnected(4000);
             rval=this->rxSig->IsConnected();
+            qDebug("rval=%d",rval);
         }
         return rval;
     }
@@ -192,6 +193,25 @@ bool AVS4000Client::DisconnectRx(quint32 &errorCode,QString &errorDetails)
     }
     return rval;
 }
+
+bool AVS4000Client::WaitForRxData(quint32 msTimeout)
+{
+    quint32 ec;
+    QString details;
+    QElapsedTimer et;
+    et.start();
+    while (et.elapsed()<qint64(msTimeout)) {
+        QVariantMap map=Get("rxstat",ec,details);
+        if (map.contains("Sample") && map["Sample"].toUInt()>0) {
+            qDebug("WaitForRxData: %lld ms",et.elapsed());
+            return true;
+        }
+        QThread::msleep(100);
+    }
+    qWarning("WaitForRxData: timeout after %d ms",msTimeout);
+    return false;
+}
+
 
 void AVS4000Client::DisconnectRx()
 {

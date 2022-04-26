@@ -43,6 +43,7 @@ public:
                       bool useVita49,
                       quint32 &errorCode, QString &errorDetails);
     bool DisconnectRx(quint32 &errorCode,QString &errorDetails);
+    bool WaitForRxData(quint32 msTimeout=20000);
 
     quint32 GetRxSampleRate(quint32 &errorCode,QString &errorDetails);
     bool SetRxSampleRate(quint32 val,quint32 &errorCode,QString &errorDetails);
