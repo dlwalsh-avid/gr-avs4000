@@ -137,8 +137,12 @@ namespace gr {
         if (client==nullptr || client->txSig==nullptr) return -1;
 
         for (int i=0;i<samples;i++) {
-            tBuf[i*2]=qint16(in[i].real());
-            tBuf[i*2+1]=qint16(in[i].imag());
+//            tBuf[i*2]=qint16(in[i].real());
+//            tBuf[i*2+1]=qint16(in[i].imag());
+            // The above code was backwards.
+            // The Q word comes before the I word. -dlw 5/27/22
+            tBuf[i*2]=qint16(in[i].imag());
+            tBuf[i*2+1]=qint16(in[i].real());
         }
         // this function needs to not block!!  or only block for short time
         quint32 rval=client->txSig->Send((const quint8*)tBuf,bytes);

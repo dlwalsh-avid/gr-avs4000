@@ -55,7 +55,8 @@ namespace gr {
                        const char *tbSource,
                        const char *refMode=nullptr,
                        const char *ppsSource=nullptr,
-                       bool sysSync=false,bool useFracSec=true);
+                       bool sysSync=false,bool useFracSec=true,
+		       bool useTestPattern=false);
       virtual void SetRxFreq(double freq)=0;
       virtual void SetRxGain(int rfGain)=0;
       virtual void SetDDCFreq(double freq)=0;

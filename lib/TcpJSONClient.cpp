@@ -212,11 +212,34 @@ void TcpJSONClient::ReadAvailable()
     rsp.clear();
     if (socket && socket->isValid()) {
         QByteArray bytes=socket->readLine(64*1024);
+        // The bytes returned could only be a partial
+        // response, so the remaining portion of the data
+        // needs to be read.
+        while (bytes.indexOf('\n')<0) {
+//            qDebug("bytes.len=%d",bytes.length());
+            QByteArray B;
+            for (int i=0;i<10;i++) {
+                // in between reads, we need to do a wait
+                // that lets the event loop to run, this is
+                // needed for the QTcpSocket to work.
+                QEventLoop loop;
+                QTimer::singleShot(10,&loop,SLOT(quit()));
+                loop.exec();
+                B=socket->readLine(64*1024);
+//                qDebug("B.len=%d",B.length());
+                if (B.length()>0) break;
+            }
+//            qDebug("B.len=%d",B.length());
+            if (B.length()==0) break;
+            bytes.append(B);
+        }
+//        qDebug("bytes.len=%d",bytes.length());
         QJsonParseError error;
         QJsonDocument doc=QJsonDocument::fromJson(bytes,&error);
         if (doc.isNull()) {
-            qWarning("Error parsing JSON: %s len=%d",
-                     qPrintable(error.errorString()),bytes.length());
+            qWarning("Error parsing JSON: %s len=%d\n%s",
+                     qPrintable(error.errorString()),bytes.length(),
+                     bytes.constData());
 //            emit ParseError();
         } else {
             if (verbose)

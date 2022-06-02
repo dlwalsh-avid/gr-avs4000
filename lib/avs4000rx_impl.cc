@@ -69,7 +69,8 @@ namespace gr {
                     double ddcFreq,double ddcOutGain,
                     const char *startMode,bool refMaster,
                     const char *tbSource,const char *refMode,
-                    const char *ppsSource,bool sysSync,bool useFracSec)
+                    const char *ppsSource,bool sysSync,bool useFracSec,
+                    bool useTestPattern)
     {
       return gnuradio::get_initial_sptr
         (new avs4000rx_impl(host,dn,
@@ -77,7 +78,8 @@ namespace gr {
                             rfGain,gainMode,
                             ddcFreq,ddcOutGain,
                             startMode,refMaster,
-                            tbSource,refMode,ppsSource,sysSync,useFracSec));
+                            tbSource,refMode,ppsSource,sysSync,
+                            useFracSec,useTestPattern));
     }
 
     /*
@@ -92,7 +94,8 @@ namespace gr {
                                    const char *tbSource,
                                    const char *refMode,
                                    const char *ppsSource,
-                                   bool sysSync,bool useFracSec)
+                                   bool sysSync,bool useFracSec,
+                                   bool useTestPattern)
       : gr::sync_block("avs4000rx",
               gr::io_signature::make(0,0,0),
               gr::io_signature::make(1, 1, sizeof(gr_complex)))
@@ -118,6 +121,7 @@ namespace gr {
         this->updateCount=0;
         this->useFracSec=useFracSec;
         this->masterSampleRate=0.0;
+        this->useTestPattern=useTestPattern;
     }
 
     /*
@@ -183,8 +187,12 @@ namespace gr {
             }
         }
         for (int i=0;i<samples;i++) {
-            out[i].real(float(rBuf[i*2]));
-            out[i].imag(float(rBuf[i*2+1]));
+//            out[i].real(float(rBuf[i*2]));
+//            out[i].imag(float(rBuf[i*2+1]));
+            // The above code was backwards.
+            // The Q word comes before the I word. -dlw 5/27/22
+            out[i].imag(float(rBuf[i*2]));
+            out[i].real(float(rBuf[i*2+1]));
         }
         return samples;
     }
@@ -290,7 +298,7 @@ namespace gr {
         bool rval=client->Set(map,ecode,details);
         if (rval) {
             rval=client->ConnectRxTcp(host,AVSRX_BASEPORT+dn,true,ecode,details) &&
-                 client->StartRxData(false,ecode,details);
+                 client->StartRxData(useTestPattern,ecode,details);
         }
         if (!rval)
             qWarning("Rx Startup Failed: %s",qPrintable(details));

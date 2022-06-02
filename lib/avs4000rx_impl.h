@@ -49,6 +49,7 @@ namespace gr {
         qint16 *rBuf;
         bool useFracSec;
         double masterSampleRate;
+        bool useTestPattern;
 
      public:
       avs4000rx_impl(const std::string &host, int dn,
@@ -59,7 +60,7 @@ namespace gr {
                      const char *tbSource,
                      const char *refMode,
                      const char *ppsSource,
-                     bool sysSync,bool useFracSec);
+                     bool sysSync,bool useFracSec,bool useTestPattern);
       ~avs4000rx_impl();
 
       bool SetRate(double rate);

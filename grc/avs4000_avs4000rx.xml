@@ -9,7 +9,8 @@
                           $rfGain, $gainMode,
                           $ddcFreq, $ddcOutGain,
                           $startMode, $refMaster,
-                          $tbSrc,$refMode,$ppsSel,$sysSync,$useFracSec)</make>
+                          $tbSrc,$refMode,$ppsSel,$sysSync,
+			  $useFracSec,$useTestPattern)</make>
   <callback>SetRxFreq($rxFreq)</callback>
   <callback>SetDDCFreq($ddcFreq)</callback>
   <callback>SetDDCOutGain($ddcOutGain)</callback>
@@ -220,6 +221,20 @@
           <name>Use Fractional Sec</name>
           <key>useFracSec</key>
           <value>Enable</value>
+          <type>enum</type>
+          <option>
+            <name>Disable</name>
+            <key>False</key>
+          </option>
+          <option>
+            <name>Enable</name>
+            <key>True</key>
+          </option>
+  </param>
+  <param>
+          <name>Use Test Pattern</name>
+          <key>useTestPattern</key>
+          <value>Disable</value>
           <type>enum</type>
           <option>
             <name>Disable</name>
